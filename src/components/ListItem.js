@@ -1,15 +1,31 @@
 import React, { Component } from 'react';
-import { Text, TouchableWithoutFeedback, View } from 'react-native';
+import {
+    Text,
+    TouchableWithoutFeedback,
+    View,
+    UIManager,
+    LayoutAnimation
+} from 'react-native';
+
 import { connect } from 'react-redux';
 import { CardSection } from './common';
 import * as actions from '../actions';
 
 class ListItem extends Component {
+    componentWillUpdate(){
+        UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+        LayoutAnimation.configureNext(CustomLayoutSpring);
+    }
+
     renderDescription = () => {
         // if (this.props.library.item.id === this.props.selectedLibraryId){
         if (this.props.expanded) {
             return (
-                <Text>{this.props.library.item.description}</Text>
+                <CardSection>
+                    <Text style={{ flex: 1 }}>
+                        {this.props.library.item.description}
+                    </Text>
+                </CardSection>
             );
         }
     }
@@ -19,7 +35,7 @@ class ListItem extends Component {
 
         console.log(this.props)
         return(
-            <TouchableWithoutFeedback onPress={() => this.props.selectLibrary(id)}>
+            <TouchableWithoutFeedback onPress={() => { this.props.selectLibrary(id), LayoutAnimation.linear() }}>
                 <View>
                     <CardSection>
                         <Text style={titleStyle}>
@@ -40,6 +56,18 @@ const styles = {
         paddingLeft: 15
     }
 }
+const CustomLayoutSpring = {
+    duration: 100,
+    create: {
+        type: LayoutAnimation.Types.spring,
+        property: LayoutAnimation.Properties.scaleXY,
+        springDamping: 0.7,
+    },
+    update: {
+        type: LayoutAnimation.Types.spring,
+        springDamping: 0.7,
+    },
+};
 
 const mapStateToProps = (state, ownProps) => {
     const expanded = state.selectedLibraryId === ownProps.library.item.id
